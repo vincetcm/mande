@@ -6,7 +6,7 @@ sleep 2
 
 
 NODE_WALLET=wallet
-STRD=mande-chaind
+NODE=mande-chaind
 NODE_ID=mande-testnet-1
 NODE_PORT=87
 NODE_FOLDER=.mande-chaind
@@ -23,7 +23,7 @@ NODE_PEERS=f9dec9a209fdcb22339d87eaadffde97d3ecf648@45.67.216.40:26656,c2ec4f719
 sleep 1
 
 echo "export NODE_WALLET=${NODE_WALLET}" >> $HOME/.bash_profile
-echo "export STRD=${STRD}" >> $HOME/.bash_profile
+echo "export NODE=${NODE}" >> $HOME/.bash_profile
 echo "export NODE_ID=${NODE_ID}" >> $HOME/.bash_profile
 echo "export NODE_PORT=${NODE_PORT}" >> $HOME/.bash_profile
 echo "export NODE_FOLDER=${NODE_FOLDER}" >> $HOME/.bash_profile
@@ -83,7 +83,7 @@ git clone $NODE_REPO
 cd $NODE_FOLDER2
 git checkout $NODE_VER
 make build
-mv $HOME/testnet-1/build/strided /usr/local/bin
+mv $HOME/testnet-1/build/mande-chaind /usr/local/bin
 
 
 sleep 1
