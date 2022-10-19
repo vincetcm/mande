@@ -1,0 +1,165 @@
+#!/bin/bash
+                                  
+
+
+sleep 2
+
+
+NODE_WALLET=wallet
+STRD=strided
+NODE_ID=mande-testnet-1
+NODE_PORT=87
+NODE_FOLDER=.mande-chaind
+NODE_FOLDER2=testnet-1
+NODE_VER=v1.0.0
+NODE_REPO=https://github.com/mande-labs/testnet-1
+NODE_GENESIS=https://raw.githubusercontent.com/mande-labs/testnet-1/main/genesis.json
+NODE_ADDRBOOK=
+NODE_MIN_GAS=0
+NODE_DENOM=mand
+NODE_SEEDS=
+NODE_PEERS=f9dec9a209fdcb22339d87eaadffde97d3ecf648@45.67.216.40:26656,c2ec4f71950d1d4e6233ed450b09f08d15ffbe98@195.201.165.123:10086,4fbbf09c5561c4a9692e368a672b99180b3f70ee@185.182.184.200:46656,156eb9c408b5274c14e7139fa14b3210de359848@5.161.113.160:26656,074a8eaf817da9df97c5becf367baaf2f3e1917f@135.125.163.63:26666,19a7467dc9aa99b3cdc8ee82492a57c4ffa46fc3@5.161.98.239:26656,2365cf1278df6bdf26b314d4f9c4e4108734b51d@144.126.156.253:26656,a3e3e20528604b26b792055be84e3fd4de70533b@38.242.199.93:24656
+
+sleep 1
+
+echo "export NODE_WALLET=${NODE_WALLET}" >> $HOME/.bash_profile
+echo "export STRD=${STRD}" >> $HOME/.bash_profile
+echo "export NODE_ID=${NODE_ID}" >> $HOME/.bash_profile
+echo "export NODE_PORT=${NODE_PORT}" >> $HOME/.bash_profile
+echo "export NODE_FOLDER=${NODE_FOLDER}" >> $HOME/.bash_profile
+echo "export NODE_FOLDER2=${NODE_FOLDER2}" >> $HOME/.bash_profile
+echo "export NODE_VER=${NODE_VER}" >> $HOME/.bash_profile
+echo "export NODE_REPO=${NODE_REPO}" >> $HOME/.bash_profile
+echo "export NODE_GENESIS=${NODE_GENESIS}" >> $HOME/.bash_profile
+echo "export NODE_PEERS=${NODE_PEERS}" >> $HOME/.bash_profile
+echo "export NODE_SEED=${NODE_SEED}" >> $HOME/.bash_profile
+echo "export NODE_MIN_GAS=${NODE_MIN_GAS}" >> $HOME/.bash_profile
+echo "export NODE_DENOM=${NODE_DENOM}" >> $HOME/.bash_profile
+source $HOME/.bash_profile
+
+sleep 1
+
+if [ ! $NODE_NODENAME ]; then
+  read -p "NODE ISMI YAZINIZ: " NODE_NODENAME
+  echo 'export NODE_NODENAME='$NODE_NODENAME >> $HOME/.bash_profile
+fi
+
+echo -e "NODE ISMINIZ: \e[1m\e[32m$NODE_NODENAME\e[0m"
+echo -e "CUZDAN ISMINIZ: \e[1m\e[32m$NODE_WALLET\e[0m"
+echo -e "CHAIN ISMI: \e[1m\e[32m$NODE_ID\e[0m"
+echo -e "PORT NUMARANIZ: \e[1m\e[32m$NODE_PORT\e[0m"
+echo '================================================='
+
+sleep 2
+
+
+# GUNCELLEMELER by Nodeist
+echo -e "\e[1m\e[32m1. GUNCELLEMELER YUKLENIYOR... \e[0m" && sleep 1
+sudo apt update && sudo apt upgrade -y
+
+
+# GEREKLI PAKETLER by Nodeist
+echo -e "\e[1m\e[32m2. GEREKLILIKLER YUKLENIYOR... \e[0m" && sleep 1
+sudo apt install curl tar wget clang pkg-config libssl-dev jq build-essential bsdmainutils git make ncdu gcc git jq chrony liblz4-tool -y
+
+# GO KURULUMU by Nodeist
+echo -e "\e[1m\e[32m1. GO KURULUYOR... \e[0m" && sleep 1
+ver="1.18.2"
+cd $HOME
+wget "https://golang.org/dl/go$ver.linux-amd64.tar.gz"
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf "go$ver.linux-amd64.tar.gz"
+rm "go$ver.linux-amd64.tar.gz"
+echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> ~/.bash_profile
+source ~/.bash_profile
+go version
+
+sleep 1
+
+# KUTUPHANE KURULUMU by Nodeist
+echo -e "\e[1m\e[32m1. REPO YUKLENIYOR... \e[0m" && sleep 1
+cd $HOME
+git clone $NODE_REPO
+cd $NODE_FOLDER2
+git checkout $NODE_VER
+make build
+mv $HOME/testnet-1/build/strided /usr/local/bin
+
+
+sleep 1
+
+# KONFIGURASYON by Nodeist
+echo -e "\e[1m\e[32m1. KONFIGURASYONLAR AYARLANIYOR... \e[0m" && sleep 1
+$NODE config chain-id $NODE_ID
+$NODE config keyring-backend file
+$NODE init $NODE_NODENAME --chain-id $NODE_ID
+
+# ADDRBOOK ve GENESIS by Nodeist
+wget $NODE_GENESIS -O $HOME/$NODE_FOLDER/config/genesis.json
+wget $NODE_ADDRBOOK -O $HOME/$NODE_FOLDER/config/addrbook.json
+
+# EŞLER VE TOHUMLAR by Nodeist
+SEEDS="$NODE_SEEDS"
+PEERS="$NODE_PEERS"
+sed -i -e "s/^seeds *=.*/seeds = \"$SEEDS\"/; s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" $HOME/$NODE_FOLDER/config/config.toml
+
+sleep 1
+
+
+# config pruning
+pruning="custom"
+pruning_keep_recent="100"
+pruning_keep_every="0"
+pruning_interval="50"
+sed -i -e "s/^pruning *=.*/pruning = \"$pruning\"/" $HOME/$NODE_FOLDER/config/app.toml
+sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"$pruning_keep_recent\"/" $HOME/$NODE_FOLDER/config/app.toml
+sed -i -e "s/^pruning-keep-every *=.*/pruning-keep-every = \"$pruning_keep_every\"/" $HOME/$NODE_FOLDER/config/app.toml
+sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"$pruning_interval\"/" $HOME/$NODE_FOLDER/config/app.toml
+
+
+# ÖZELLEŞTİRİLMİŞ PORTLAR by Nodeist
+sed -i.bak -e "s%^proxy_app = \"tcp://127.0.0.1:26658\"%proxy_app = \"tcp://127.0.0.1:${NODE_PORT}658\"%; s%^laddr = \"tcp://127.0.0.1:26657\"%laddr = \"tcp://127.0.0.1:${NODE_PORT}657\"%; s%^pprof_laddr = \"localhost:6060\"%pprof_laddr = \"localhost:${NODE_PORT}060\"%; s%^laddr = \"tcp://0.0.0.0:26656\"%laddr = \"tcp://0.0.0.0:${NODE_PORT}656\"%; s%^prometheus_listen_addr = \":26660\"%prometheus_listen_addr = \":${NODE_PORT}660\"%" $HOME/$NODE_FOLDER/config/config.toml
+sed -i.bak -e "s%^address = \"tcp://0.0.0.0:1317\"%address = \"tcp://0.0.0.0:${NODE_PORT}317\"%; s%^address = \":8080\"%address = \":${NODE_PORT}080\"%; s%^address = \"0.0.0.0:9090\"%address = \"0.0.0.0:${NODE_PORT}090\"%; s%^address = \"0.0.0.0:9091\"%address = \"0.0.0.0:${NODE_PORT}091\"%" $HOME/$NODE_FOLDER/config/app.toml
+sed -i.bak -e "s%^node = \"tcp://localhost:26657\"%node = \"tcp://localhost:${NODE_PORT}657\"%" $HOME/$NODE_FOLDER/config/client.toml
+
+# PROMETHEUS AKTIVASYON by Nodeist
+sed -i -e "s/prometheus = false/prometheus = true/" $HOME/$NODE_FOLDER/config/config.toml
+
+# MINIMUM GAS AYARI by Nodeist
+sed -i -e "s/^minimum-gas-prices *=.*/minimum-gas-prices = \"0.00125$NODE_DENOM\"/" $HOME/$NODE_FOLDER/config/app.toml
+
+# INDEXER AYARI by Nodeist
+indexer="null" && \
+sed -i -e "s/^indexer *=.*/indexer = \"$indexer\"/" $HOME/$NODE_FOLDER/config/config.toml
+
+# RESET by Nodeist
+$NODE tendermint unsafe-reset-all --home $HOME/$NODE_FOLDER
+
+echo -e "\e[1m\e[32m4. SERVIS BASLATILIYOR... \e[0m" && sleep 1
+# create service
+sudo tee /etc/systemd/system/$NODE.service > /dev/null <<EOF
+[Unit]
+Description=$NODE
+After=network.target
+[Service]
+Type=simple
+User=$USER
+ExecStart=$(which $NODE) start
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=65535
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+# SERVISLERI BASLAT by Nodeist
+sudo systemctl daemon-reload
+sudo systemctl enable $NODE
+sudo systemctl restart $NODE
+
+echo '=============== KURULUM TAMAM! by Nodeist ==================='
+echo -e 'LOGLARI KONTROL ET: \e[1m\e[32mjournalctl -f $NODE\e[0m'
+echo -e "SENKRONIZASYONU KONTROL ET: \e[1m\e[32mcurl -s localhost:${NODE_PORT}657/status | jq .result.sync_info\e[0m"
+
+source $HOME/.bash_profile
