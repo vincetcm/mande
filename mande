@@ -64,7 +64,7 @@ sudo apt install curl tar wget clang pkg-config libssl-dev jq build-essential bs
 
 # GO KURULUMU by Nodeist
 echo -e "\e[1m\e[32m1. GO KURULUYOR... \e[0m" && sleep 1
-ver="1.18.2"
+ver="1.19"
 cd $HOME
 wget "https://golang.org/dl/go$ver.linux-amd64.tar.gz"
 sudo rm -rf /usr/local/go
@@ -81,7 +81,7 @@ echo -e "\e[1m\e[32m1. REPO YUKLENIYOR... \e[0m" && sleep 1
 cd $HOME
 git clone $NODE_REPO
 cd $NODE_FOLDER2
-git checkout $NODE_VER
+
 make build
 mv $HOME/testnet-1/build/mande-chaind /usr/local/bin
 
