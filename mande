@@ -6,7 +6,7 @@ sleep 2
 
 
 NODE_WALLET=wallet
-STRD=strided
+STRD=mande-chaind
 NODE_ID=mande-testnet-1
 NODE_PORT=87
 NODE_FOLDER=.mande-chaind
